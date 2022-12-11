@@ -1,0 +1,191 @@
+import numpy as np
+import math
+def drain(st):
+    row =[]
+    elem =''
+    poss = []
+    for i in range(0, len(st)):
+        if st[i]!="+" and st[i]!="(" and st[i]!=")":
+            elem += st[i]
+            if i+1 < len(st) and st[i+1].isupper():
+                row.append(elem)
+                elem = ''
+        elif elem != '':
+            if not(elem.isdigit()):
+                row.append(elem)
+            elem = ''
+        if st[i]=='(':
+            poss.append(len(row))
+        if st[i] == ')':
+            pos = poss[-1]
+            kof = ''
+            for t in range(i + 1, len(st)):
+                if st[t].isdigit():
+                    kof += st[t]
+                else:
+                    break
+            while pos < len(row):
+                if row[pos][-1].isalpha():
+                    row[pos] = row[pos] + kof
+                else:
+                    kof2 = ''
+                    for t in range(-1, -1 * len(row[pos]), -1):
+                        if row[pos][t].isdigit():
+                            kof2 = row[pos][t] + kof2
+                        else:
+                            break
+                    row[pos] = row[pos][:-len(kof2)] + str(int(kof) * int(kof2))
+                pos += 1
+            poss.pop()
+    if elem != ''and not elem.isdigit(): row.append(elem)
+    return row
+def set_elem(h1):
+    row = []
+    for i in range(0, len(h1)):
+        if not h1[i].isdigit() and h1[i] != "+" and h1[i] != "(" and h1[i] != ")" and h1[i].isupper():
+            if i + 1 < len(h1) and h1[i + 1].isalpha() and h1[i + 1].islower():
+                row.append(h1[i] + h1[i + 1])
+            else:
+                row.append(h1[i])
+    row = set(row)
+    return row
+def part1(st):
+    part_row = []
+    row = drain(st)
+    set_row = set_elem(st)
+    for el in set_row:
+        s = 0
+        for i in row:
+            kof =''
+            if el in i:
+                for t in range(-1, -1 * len(i), -1):
+                    if i[t].isdigit():
+                        kof = i[t] + kof
+                    else:
+                        break
+                if kof=='':
+                    kof = 1
+                s += int(kof)
+        if s==1:
+            part_row.append(el)
+        else:
+            part_row.append(el+str(s))
+    return part_row
+reagents = []
+products = []
+print("Введите реагенты")
+h1 = str(input())
+h2=h1.split('+')
+print("Введите продукты")
+h3 = str(input())
+h4=h3.split('+')
+list1 =[]
+for x in h2:
+    list1.append(part1(x))
+list2=[]
+h11 = h1
+h21 = h2
+h31 = h3
+h41 = h4
+h1 = h3
+h2 = h4
+for x in h2:
+    list2.append(part1(x))
+h5 = list(h1)
+h6 = set(h5)
+row = set_elem(h1)
+row = list(row)
+column = []
+column.extend(h21)
+column.extend(h41)
+Nrow = int()
+Ncolumn=int()
+Nrow = len(row)
+Ncolumn = len(h21)+len(h41)
+h1 = h11
+h2 = h21
+h3 = h31
+h4 = h41
+matrix = []
+list3 = list1+list2
+matrix = []
+for i in range(0,Nrow):
+    ListMatrix=[]
+    for j in range(0,Ncolumn):
+        if j<len(list1):
+            a = []
+            a = list3[j]
+            if row[i] in column[j]:
+                for n in range(0, len(a)):
+                    c = str()
+                    c = a[n][:2]
+                    if len(c) > 1:
+                        if c[1].isdigit():
+                            c = c[:1]
+                    b = a[n][len(c):]
+                    if len(b) == 0:
+                        b = "1"
+                    if c == row[i]:
+                        ListMatrix.append(int(b))
+            else:
+                ListMatrix.append(0)
+        else:
+            a = []
+            a = list3[j]
+            if row[i] in column[j]:
+                for n in range(0, len(a)):
+                    c = str()
+                    c = a[n][:2]
+                    if len(c) > 1:
+                        if c[1].isdigit():
+                            c = c[:1]
+                    b = a[n][len(c):]
+                    if len(b)==0:
+                        b = "1"
+                    if c == row[i]:
+                        ListMatrix.append(int(b)*(-1))
+            else:
+                ListMatrix.append(0)
+    matrix.append(ListMatrix)
+while len(matrix) >= Ncolumn:
+    matrix = matrix[1:]
+list = []
+for i in range(0,Ncolumn):
+    if i == 0:
+        list.append(1)
+    else:
+        list.append(0)
+matrix.append(list)
+matrix1 = []
+for i in range(0,len(matrix)):
+    if len(matrix)==1:
+        break
+    if i == (len(matrix)-1):
+        matrix1.append((2**6)*(3**4)*5*5*7*7*11*13*17*19*23)
+    else:
+        matrix1.append(0)
+x = np.linalg.solve(matrix, matrix1)
+x2 = []
+for i in range(0,len(x)):
+    x2.append(int(x[i]+0.1))
+NOD = int()
+NOD = math.gcd(*x2)
+m = min(x)
+x1 = []
+for i in range(0, len(x)):
+    x1.append(int((x2[i]/NOD)))
+output = []
+a = str()
+for i in range(0,len(list1)):
+    if i == (len(list1)-1):
+        a = str(x1[i]) + str(column[i])+"="
+    else:
+        a = str(x1[i])+str(column[i])+"+"
+    output.append(a)
+for i in range(len(list1),len(list3)):
+    if i == (len(list3) - 1):
+        a = str(x1[i]) + str(column[i])
+    else:
+        a = str(x1[i]) + str(column[i]) + "+"
+    output.append(a)
+print("".join(output))
